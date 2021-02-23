@@ -1,0 +1,4 @@
+node_modules
+*.log
+wserver_config.json
+wclient_config.json
