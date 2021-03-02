@@ -1,0 +1,32 @@
+{
+  "host": "0.0.0.0",
+  "port": 8888,
+  "key": "./keys/server.key",
+  "cert": "./keys/server.cert",
+  "log": {
+    "level": "info",
+    "config": {
+      "appenders": {
+        "console": {
+          "type": "console"
+        }
+      },
+      "categories": {
+        "default": {
+          "appenders": ["console"],
+          "level": "error"
+        }
+      }
+    }
+  },
+  "ports": [
+    {
+      "port": 3389,
+      "proto": "tcp"
+    },
+    {
+      "port": 3389,
+      "proto": "udp"
+    }
+  ]
+}

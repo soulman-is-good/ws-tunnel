@@ -1,11 +1,12 @@
 {
   "name": "ws-tunnel",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.2",
+  "description": "WebSocket tunnel Node.JS app",
   "main": "index.js",
   "scripts": {
     "server": "node aserver.js",
     "client": "node aclient.js",
+    "generate:keys": "openssl req -nodes -new -x509 -keyout keys/server.key -out keys/server.cert -subj '/C=US/ST=Ohio/L=Columbus/O=ACME/OU=IT'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +16,8 @@
     "url": "https://github.com/soulman-is-good/ws-tunnel"
   },
   "dependencies": {
+    "http-proxy-agent": "^4.0.1",
+    "log4js": "^6.3.0",
     "ws": "^7.4.3"
   }
 }

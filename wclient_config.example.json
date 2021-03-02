@@ -1,0 +1,34 @@
+{
+  "host": "some.remote.server",
+  "port": 8888,
+  "log": {
+    "level": "info",
+    "config": {
+      "appenders": {
+        "console": {
+          "type": "console"
+        }
+      },
+      "categories": {
+        "default": {
+          "appenders": ["console"],
+          "level": "error"
+        }
+      }
+    }
+  },
+  "paths": [
+    {
+      "path": "/3389t",
+      "host": "127.0.0.1",
+      "port": 3389,
+      "proto": "tcp"
+    },
+    {
+      "path": "/3389u",
+      "host": "127.0.0.1",
+      "port": 3389,
+      "proto": "udp"
+    }
+  ]
+}

@@ -1,12 +1,17 @@
-const http = require('http');
+const https = require('https');
 const net = require('net');
 const dgram = require('dgram');
 const url = require('url');
+const fs = require('fs');
 const WebSocket = require('ws');
+const log4js = require('log4js');
 const { Code } = require('./src/consts/common');
 const { wrapBuffer, ctrlToString } = require('./src/utils/common');
 const config = require('./wserver_config.json');
 
+log4js.configure(config.log.config);
+
+const logger = log4js.getLogger("Server");
 const connections = [];
 const data = {};
 const findFreeSessionID = () => {
@@ -14,8 +19,13 @@ const findFreeSessionID = () => {
 
   return idx === -1 ? connections.length : idx;
 };
+const options = {
+  key: fs.readFileSync(config.key),
+  cert: fs.readFileSync(config.cert),
+};
+const server = https.createServer(options);
 
-const server = http.createServer();
+logger.level = config.log.level;
 
 // init ports
 config.ports.forEach(portC => {
@@ -50,11 +60,11 @@ server.on('upgrade', (request, socket, head) => {
 });
 
 server.listen(config.port, config.host, () => {
-  console.log('Websocket tunnel server is listening on port', server.address().port);
-  console.log(' Following tunnels were created:');
+  logger.info('Websocket tunnel server is listening on port', server.address().port);
+  logger.info(' Following tunnels were created:');
   Object.keys(data).forEach(path => {
     const conf = data[path];
-    console.log(`    => ${conf.proto} server on ${conf.port} port listeing web socket path ${server.address().address}:${server.address().port}${path}`);
+    logger.info(`    => ${conf.proto} server on ${conf.port} port listeing web socket path ${server.address().address}:${server.address().port}${path}`);
   });
 });
 
@@ -64,8 +74,9 @@ function createServer(proto, port, conf) {
 
   if (proto === 'tcp') {
     server = net.createServer();
-    server.listen(port, '127.0.0.1');
-    server.on('error', console.error);
+    // TODO: Make listening host configurable1
+    server.listen(port, '0.0.0.0');
+    server.on('error', logger.error);
     server.on('connection', sock => {
       const sessionID = findFreeSessionID();
       connections[sessionID] = sock;
@@ -79,8 +90,8 @@ function createServer(proto, port, conf) {
     });
   } else {
     server = dgram.createSocket('udp4');
-    server.bind(port, '127.0.0.1');
-    server.on('error', console.error);
+    server.bind(port, '0.0.0.0');
+    server.on('error', logger.error);
     const sessionID = findFreeSessionID();
     connections[sessionID] = server;
     server.on('message', (buf, rinfo) => {
@@ -110,11 +121,11 @@ function createWebSocketServer(conf) {
       const cli = connections[sessionID];
 
       if (!cli) {
-        console.error('Wrong session ID, no connection there', sessionID, 'from', sock.url);
+        logger.error('Wrong session ID, no connection there', sessionID, 'from', sock.url);
         return;
       }
       const data = msg.subarray(5);
-      console.log(sessionID, '=>', ctrlToString(ctrl));
+      logger.trace(sessionID, '=>', ctrlToString(ctrl));
 
       if (ctrl === Code.MSG) {
         if (conf.proto === 'tcp') {
@@ -123,11 +134,11 @@ function createWebSocketServer(conf) {
           cli.send(data, cli.port, cli.host);
         }
       } else if (ctrl === Code.CLOSE) {
-        console.log('Closing conn')
+        logger.debug('Closing connection')
         cli.end();
         connections[sessionID] = null;
       } else {
-        console.error('Unknown control byte', ctrl, 'from', sock.url);
+        logger.error('Unknown control byte', ctrl, 'from', sock.url);
       }
     });
   });
