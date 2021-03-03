@@ -46,6 +46,8 @@ config.ports.forEach(portC => {
   data[path].server = createServer(portC.proto, port, data[path]);
 });
 
+server.on('connection', sock => log.debug('Connection from', sock.address()));
+
 // Setup main server
 server.on('upgrade', (request, socket, head) => {
   const pathname = url.parse(request.url).pathname;
