@@ -1,6 +1,6 @@
 {
   "name": "ws-tunnel",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "WebSocket tunnel Node.JS app",
   "main": "index.js",
   "scripts": {
