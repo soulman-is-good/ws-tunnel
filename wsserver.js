@@ -47,10 +47,15 @@ function main() {
     const port = portC.port;
 
     data[path] = {
+      /**
+       * @returns boolean true - when connection is established false - no client listenting
+       */
       toWebSocket: (buf) => {
         if (data[path].websocket) {
           data[path].websocket.send(buf);
+          return true;
         }
+        return false;
       },
     };
     data[path].path = path;
@@ -107,13 +112,19 @@ function createServer(proto, port, conf) {
     server.on("connection", (sock) => {
       const sessionID = findFreeSessionID();
       connections[sessionID] = sock;
-      conf.toWebSocket(wrapBuffer(Code.CONNECT, sessionID));
-      sock.on("data", (msg) => {
-        conf.toWebSocket(wrapBuffer(Code.MSG, sessionID, msg));
-      });
-      sock.on("close", () => {
-        conf.toWebSocket(wrapBuffer(Code.CLOSE, sessionID));
-      });
+      // If corresponding ws exists - send data there and receive
+      if (conf.toWebSocket(wrapBuffer(Code.CONNECT, sessionID))) {
+        sock.on("data", (msg) => {
+          conf.toWebSocket(wrapBuffer(Code.MSG, sessionID, msg));
+        });
+        sock.on("close", () => {
+          conf.toWebSocket(wrapBuffer(Code.CLOSE, sessionID));
+        });
+      } else {
+        // Can't conntect to ws - terminate
+        sock.destroy();
+        connections[sessionID] = null;
+      }
     });
   } else {
     server = dgram.createSocket("udp4");
