@@ -4,8 +4,8 @@
   "description": "WebSocket tunnel Node.JS app",
   "main": "index.js",
   "scripts": {
-    "server": "node aserver.js",
-    "client": "node aclient.js",
+    "server": "node wsserver.js",
+    "client": "node wsagent.js",
     "generate:keys": "openssl req -nodes -new -x509 -keyout keys/server.key -out keys/server.cert -subj '/C=US/ST=Ohio/L=Columbus/O=ACME/OU=IT'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
