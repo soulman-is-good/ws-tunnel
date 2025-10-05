@@ -19,5 +19,8 @@
     "http-proxy-agent": "^4.0.1",
     "log4js": "^6.3.0",
     "ws": "^7.4.3"
+  },
+  "devDependencies": {
+    "bun": "^1.2.23"
   }
 }
